@@ -1,4 +1,4 @@
-import Combine // for Just
+//import Combine // for Just
 import SwiftUI
 
 // See https://stackoverflow.com/questions/58733003/swiftui-how-to-create-textfield-that-only-accepts-numbers/58736068#58736068
@@ -33,30 +33,22 @@ enum ShirtSize: String, CaseIterable {
     case extraLarge
 }
 
-enum Sport: String, CaseIterable, Equatable {
-    case none
-    case baseball
-    case cycling
-    case football
-    case golf
-    case hockey
-    case running
-    case swimming
-    case tennis
-}
-
 struct ContentView: View {
+    private static let blogUrl = "https://mvolkmann.github.io/blog"
+    
+    // Typically form data would be tied to ViewModel properties
+    // rather than using @State.
     @State private var bedTime: Date = Date()
     @State private var birthday: Date = Date()
     @State private var favoriteColor: Color = .yellow
     //@State private var favoriteNumber: Int = 0
-    @State private var firstName: String = ""
+    @State private var firstName = ""
     @State private var dogCount = 0
-    @State private var hungry: Bool = false
-    @State private var lastName: String = ""
+    @State private var hungry = false
+    @State private var lastName = ""
+    @State private var motto = "This is my motto."
     @State private var rating = 0.0
     @State private var shirtSize: ShirtSize = .large
-    @State private var sport: Sport = .none
     
     var isEditing = false
     
@@ -67,12 +59,18 @@ struct ContentView: View {
                     TextField("First Name", text: $firstName)
                     TextField("Last Name", text: $lastName)
                     DatePicker("Birthday", selection: $birthday, displayedComponents: .date)
-                    
-                    // There is no built-in checkbox view, put one can be created.
-                    // A Toggle is typically used in place of a checkbox.
                     Toggle("Hungry?", isOn: $hungry)
                 }
                 Section(header: Text("Preferences")) {
+                    // Links work in Simulator, but not in Preview.
+                    Link("Blog", destination: URL(string: ContentView.blogUrl)!)
+                    VStack {
+                        Text("Motto")
+                        // It seems TextEditor lineLimit is only enforced on initial render.
+                        // It doesn't prevent more lines from being displayed
+                        // if the user types more text.
+                        TextEditor(text: $motto).lineLimit(2)
+                    }
                     ColorPicker("Favorite Color", selection: $favoriteColor)
                     DatePicker("Bed Time", selection: $bedTime, displayedComponents: .hourAndMinute)
                     //NumberInput("Favorite Number", text: $favoriteNumber)
@@ -81,18 +79,10 @@ struct ContentView: View {
                             Text("\(size.rawValue)").tag(size)
                         }
                     }
-                    // Radio buttons are not currently supported in iOS.
-                    // In macOS, add the following.
-                    //.pickerStyle(RadioGroupPickerStyle())
-                    Picker("Favorite Sport", selection: $sport) {
-                        ForEach(Sport.allCases, id: \.self) { sport in
-                            Text("\(sport.rawValue)").tag(sport)
-                        }
-                    }
                     HStack {
                         Text("Rating")
+                        //TODO: Why does value have to be Float instead of Int?
                         Slider(value: $rating, in: 0...10, step: 1)
-                        //TODO: How can rating be an Int?
                         Text("\(Int(rating))")
                     }
                     HStack {
@@ -101,6 +91,16 @@ struct ContentView: View {
                     }
                     Button("Save") {}
                 }
+                
+                // Common UI components that are not built into SwiftUI include:
+                // - checkbox: alternative is Toggle
+                // - image picker: must build or using a library
+                // - multiple choice: alternative is List
+                //   inside NavigationView with EditButton
+                // - radio buttons: alternative is Picker
+                //   (supported in macOS with Picker and
+                //   .pickerStyle(RadioGroupPickerStyle())
+                // - toggle buttons: alternative is Picker
             }
         }
     }
